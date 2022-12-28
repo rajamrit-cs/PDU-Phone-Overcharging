@@ -32,7 +32,7 @@ class PDUAutomate:
         try:
             self.power_switch = dlipower.PowerSwitch(hostname=self.hostname, userid=self.user, password=self.password)
         except:
-            print('PDU device is Off, please try to connect it and try after sometime!!!')
+            print('PDU device is Off, please connect it and try after sometime!!!')
             exit(0)
 
     def start(self, action, port):
@@ -83,8 +83,8 @@ def main(argv: Optional[Sequence[str]] = None):
     parser.add_argument('--host', help='Please provide host name eg: 192.168.200.65')
     parser.add_argument('--username', help='Please provide username eg: admin')
     parser.add_argument('--password', help='Please provide password eg: 1234')
-    parser.add_argument('--action', help='Switches all Outlets in ON Mode eg: --on or --off\n')
-    parser.add_argument('--port', help='Please provide port name eg: --port lanforge')
+    parser.add_argument('--action', help='Switches all Outlets in ON Mode eg: --on or --off')
+    parser.add_argument('--port', help='Please provide port name eg: --port 1,2,3,4')
     args = parser.parse_args(argv)
     dic = vars(args)
 
@@ -94,3 +94,8 @@ def main(argv: Optional[Sequence[str]] = None):
 
 if __name__ == '__main__':
     main()
+
+
+# python main.py --host 192.168.200.50 --user admin --password Candela@123 --current on/off --port 2 --on_time 2hrs
+# --off_time 5hrs
+# from here for 2 hours it should charge and for 5hrs it should be in off condition
