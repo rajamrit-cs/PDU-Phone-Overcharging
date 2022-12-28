@@ -35,16 +35,26 @@ class PDUAutomate:
             print('PDU device is Off, please connect it and try after sometime!!!')
             exit(0)
 
-    def start(self, action, port):
-        if action == "on":
-            self.switch_on(port)
-        elif action == "off":
-            self.switch_off(port)
-        elif action == "cycle":
-            self.switch_off(port)
-            self.switch_on(port)
-        else:
-            print("[ERROR] Wrong input")
+    def start(self, action, port, current, on_time, off_time):
+        while True:
+            if current == "on":
+                self.switch_on(port)
+                time.sleep(on_time*60*60)
+                self.switch_off(off_time)
+                time.sleep(off_time*60*60)
+            elif current == "off":
+                self.switch_off(off_time)
+                time.sleep(off_time * 60 * 60)
+                self.switch_on(port)
+                time.sleep(on_time*60*60)
+
+            # elif action == "off":
+            #     self.switch_off(port)
+            # elif action == "cycle":
+            #     self.switch_off(port)
+            #     self.switch_on(port)
+            else:
+                print("[ERROR] Wrong input")
 
     def switch_on(self, port):
         self.port = port
@@ -84,12 +94,15 @@ def main(argv: Optional[Sequence[str]] = None):
     parser.add_argument('--username', help='Please provide username eg: admin')
     parser.add_argument('--password', help='Please provide password eg: 1234')
     parser.add_argument('--action', help='Switches all Outlets in ON Mode eg: --on or --off')
-    parser.add_argument('--port', help='Please provide port name eg: --port 1,2,3,4')
+    parser.add_argument('--port', help='Port number which has to be switched eg: --port 1,2,3,4')
+    parser.add_argument('--current', help='Current status after running the code eg: --current off/on')
+    parser.add_argument('--on_time', help='Time in (integer)hrs for keeping power on eg: --on_time 2')
+    parser.add_argument('--off_time', help='Time in (integer)hrs for keeping power off eg: --off_time 5')
     args = parser.parse_args(argv)
     dic = vars(args)
 
     obj = PDUAutomate(dic['host'], dic['username'], dic['password'])
-    obj.start(dic['action'], dic['port'])
+    obj.start(dic['action'], dic['port'], dic['current'], dic['on_time'], dic['off_time'])
 
 
 if __name__ == '__main__':
