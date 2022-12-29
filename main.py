@@ -24,6 +24,8 @@ except:
 
 class PDUAutomate:
     def __init__(self, hostname, user, password):
+        self.off_time = None
+        self.on_time = None
         self.port = None
         self.hostname = hostname
         self.user = user
@@ -32,27 +34,28 @@ class PDUAutomate:
         try:
             self.power_switch = dlipower.PowerSwitch(hostname=self.hostname, userid=self.user, password=self.password)
         except:
-            print('PDU device is Off, please connect it and try after sometime!!!')
+            print('[STATUS] PDU device is Off, please connect it and try after sometime!!!')
             exit(0)
 
-    def start(self, action, port, current, on_time, off_time):
+    def start(self, port, current, on_time, off_time):
+        self.on_time = int(on_time)*60
+        self.off_time = int(off_time)*60
         while True:
-            if current == "on":
-                self.switch_on(port)
-                time.sleep(on_time*60*60)
-                self.switch_off(off_time)
-                time.sleep(off_time*60*60)
-            elif current == "off":
-                self.switch_off(off_time)
-                time.sleep(off_time * 60 * 60)
-                self.switch_on(port)
-                time.sleep(on_time*60*60)
+            try:
+                if current == "on":
+                    self.switch_on(port)
+                    time.sleep(self.on_time)
+                    self.switch_off(port)
+                    time.sleep(self.off_time)
+                elif current == "off":
+                    self.switch_off(port)
+                    time.sleep(self.off_time)
+                    self.switch_on(port)
+                    time.sleep(self.on_time)
+            except KeyboardInterrupt:
+                print("[STOP] Program stopped\n")
+                exit(0)
 
-            # elif action == "off":
-            #     self.switch_off(port)
-            # elif action == "cycle":
-            #     self.switch_off(port)
-            #     self.switch_on(port)
             else:
                 print("[ERROR] Wrong input")
 
@@ -61,7 +64,6 @@ class PDUAutomate:
         if self.port != 'all':
             try:
                 port = str(self.port).split(",")
-                print(port)
                 for i in port:
                     self.power_switch[int(i) - 1].state = "ON"
             except:
@@ -75,7 +77,6 @@ class PDUAutomate:
         if self.port != 'all':
             try:
                 port = str(self.port).split(",")
-                print(port)
                 for i in port:
                     self.power_switch[int(i) - 1].state = "OFF"
             except:
@@ -85,7 +86,7 @@ class PDUAutomate:
                 outlet.state = 'OFF'
 
     def print_status(self):
-        print(self.power_switch)
+        print("[STATUS] ", self.power_switch)
 
 
 def main(argv: Optional[Sequence[str]] = None):
@@ -93,7 +94,6 @@ def main(argv: Optional[Sequence[str]] = None):
     parser.add_argument('--host', help='Please provide host name eg: 192.168.200.65')
     parser.add_argument('--username', help='Please provide username eg: admin')
     parser.add_argument('--password', help='Please provide password eg: 1234')
-    parser.add_argument('--action', help='Switches all Outlets in ON Mode eg: --on or --off')
     parser.add_argument('--port', help='Port number which has to be switched eg: --port 1,2,3,4')
     parser.add_argument('--current', help='Current status after running the code eg: --current off/on')
     parser.add_argument('--on_time', help='Time in (integer)hrs for keeping power on eg: --on_time 2')
@@ -102,7 +102,7 @@ def main(argv: Optional[Sequence[str]] = None):
     dic = vars(args)
 
     obj = PDUAutomate(dic['host'], dic['username'], dic['password'])
-    obj.start(dic['action'], dic['port'], dic['current'], dic['on_time'], dic['off_time'])
+    obj.start(dic['port'], dic['current'], dic['on_time'], dic['off_time'])
 
 
 if __name__ == '__main__':
@@ -111,4 +111,4 @@ if __name__ == '__main__':
 
 # python main.py --host 192.168.200.50 --user admin --password Candela@123 --current on/off --port 2 --on_time 2hrs
 # --off_time 5hrs
-# from here for 2 hours it should charge and for 5hrs it should be in off condition
+# from here for 2 it should charge and for 5 it should be in off condition
