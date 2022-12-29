@@ -4,10 +4,10 @@ Date: 28-12-2022
 By: Amrit Raj @ Candela Technologies Pvt. ltd.
 Note: Please ensure that PDU is powered on
     Command line to be used as
-    python pdu_automation.py --host 192.168.200.49 --user admin --password pass1234 --action on/off/cycle --port all/specific_port_number
-    Eg 1: python pdu_v3.py --host 192.168.200.49 --user admin --password pass1234 --action off --port 1
-    Eg 2: python pdu_v3.py --host 192.168.200.49 --user admin --password pass1234 --action off --port 1,2,3,4
-    Eg 3: python pdu_v3.py --host 192.168.200.49 --user admin --password pass1234 --action cycle --port all
+    python main.py --host 192.168.200.50 --user username --password pass --current starting_status_of_port --port
+    all/1,2,3 --on_time integer(hours) --off_time integer(hours)
+    Eg : python main.py --host 192.168.200.50 --user admin --password Candela@123 --current on --port all --on_time 1
+    --off_time 1
 """
 import os
 import time
@@ -38,8 +38,8 @@ class PDUAutomate:
             exit(0)
 
     def start(self, port, current, on_time, off_time):
-        self.on_time = int(on_time)*60
-        self.off_time = int(off_time)*60
+        self.on_time = int(on_time) * 60 * 60
+        self.off_time = int(off_time) * 60 * 60
         while True:
             try:
                 if current == "on":
@@ -52,12 +52,11 @@ class PDUAutomate:
                     time.sleep(self.off_time)
                     self.switch_on(port)
                     time.sleep(self.on_time)
+                else:
+                    print("[ERROR] Wrong input")
             except KeyboardInterrupt:
                 print("[STOP] Program stopped\n")
                 exit(0)
-
-            else:
-                print("[ERROR] Wrong input")
 
     def switch_on(self, port):
         self.port = port
@@ -107,8 +106,3 @@ def main(argv: Optional[Sequence[str]] = None):
 
 if __name__ == '__main__':
     main()
-
-
-# python main.py --host 192.168.200.50 --user admin --password Candela@123 --current on/off --port 2 --on_time 2hrs
-# --off_time 5hrs
-# from here for 2 it should charge and for 5 it should be in off condition
